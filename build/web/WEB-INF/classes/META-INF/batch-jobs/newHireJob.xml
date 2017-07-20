@@ -1,0 +1,9 @@
+<job id="newHireJob" xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="1.0">
+    <step id="firstStep" >
+        <chunk item-count="2">
+            <reader ref="newHireItemReader"/>
+            <processor ref="newHireItemProcessor"/>
+            <writer ref="newHireItemWriter"/>
+        </chunk>    
+    </step>
+</job>

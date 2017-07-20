@@ -1,0 +1,65 @@
+<div id="sidebar" class="sidebar">
+    <div class="sidebar-menu nav-collapse">
+        <div class="divide-20"></div>
+        <!-- SEARCH BAR -->
+        <div id="search-bar">
+            <input class="search" type="text" placeholder="Search"><i class="fa fa-search search-icon"></i>
+        </div>
+        <ul>
+            
+            <li class="active">
+                <a href="#">
+                    <i class="fa fa-tachometer fa-fw"></i> <span class="menu-text">Dashboard</span>
+                    <span class="selected"></span>
+                </a>					
+            </li>
+            
+            
+            <li><a class="" href="card_list.jsp"><i class="fa fa-users fa-fw"></i> 
+                    <span class="menu-text">Card List 
+                    </span>
+                </a>
+            </li>
+            
+            <li><a class="" href="transactions.jsp"><i class="fa fa-list fa-fw"></i> 
+                    <span class="menu-text">Transactions 
+                    </span>
+                </a>
+            </li>
+            
+            
+            
+            
+            <li><a class="" href="upload_card.jsp"><i class="fa fa-folder-open fa-fw"></i> 
+                    <span class="menu-text">Upload  Card 
+                    </span>
+                </a>
+            </li>
+            
+            
+            
+            
+            
+            <li><a class="" href="batch_inbox.jsp"><i class="fa fa-folder-open fa-fw"></i> 
+                    <span class="menu-text">Batch Inbox 
+                    </span>
+                </a>
+            </li>
+            <li><a class="" href="users.jsp"><i class="fa fa-users"></i> 
+                    <span class="menu-text">Users 
+                    </span>
+                </a>
+            </li>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+        </ul>
+        <!-- /SIDEBAR MENU -->
+    </div>
+</div>

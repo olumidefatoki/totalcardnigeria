@@ -1,0 +1,9 @@
+<%
+ session = request.getSession(false);
+if(session == null){ 
+     RequestDispatcher disp = request.getRequestDispatcher("/logout");
+           disp.forward(request, response); 
+    //response.sendRedirect("logout");
+}
+%>
+
