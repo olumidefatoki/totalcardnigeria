@@ -6,6 +6,8 @@
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -72,7 +74,7 @@ public class CardCredit extends HttpServlet {
 
             } else if (dt.getMsisdn().equals(wbm.formatDestination(msisdn))) {
 
-                String creditResp = wbm.creditCard(cardNumber, amount, "NGN");
+                String creditResp = wbm.creditCard(cardNumber, amount);
                     if (creditResp == null) {
                         resp = "25|" + Responses.CARD_CREDIT_FAILED_RESPONSE;
                         ussdRequest.put("Status", "Failed");
@@ -105,6 +107,8 @@ public class CardCredit extends HttpServlet {
 
         } catch (JSONException ex) {
            ex.printStackTrace();
+        } catch (Exception ex) {
+            Logger.getLogger(CardCredit.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 

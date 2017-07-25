@@ -185,7 +185,7 @@
                                                         <span class="title"> <br> </span>
                                                         <!--<span class="value"><span id="rec-tot"></span></span> -->
                                                         <span class="sparkline big" data-color="blue"><canvas height="40" width="82" style="display: inline-block; width: 82px; height: 40px; vertical-align: top;"></canvas></span>
-                                                        <!--<div><button class="margin-top-50 btn btn-default btn-sm form-control input-sm" id="download"><i class="fa fa-download"></i> Download full report</button></div>-->
+                                                        <div><button class="margin-top-50 btn btn-default btn-sm form-control input-sm" id="download"><i class="fa fa-download"></i> Download full report</button></div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -333,8 +333,10 @@
           //    alert(JSON.stringify(table));
                 $("#download").click(function () {
                     var data = table.ajax.params();
-                    window.location= "handler?Type=37&columns[2][search][value]=&download=1&"+$.param(data);
+                    window.location= "handler?Type=40&columns[2][search][value]=&download=1&"+$.param(data);
                 });
+                
+                
                   
               //  table.on('xhr', function () {
               //      var json = table.ajax.json();

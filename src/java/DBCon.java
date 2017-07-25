@@ -81,7 +81,9 @@ public class DBCon {
         try {
             conn = null;
             Class.forName("com.mysql.jdbc.Driver").newInstance();
-            conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/total_ussd", "total_ussd", "total_ussd");
+            //conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/total_ussd", "total_ussd", "total_ussd");
+            conn = DriverManager.getConnection("jdbc:mysql://10.25.10.100:3306/total_ussd", "total_ussd", "Total_u55d!");
+
         } catch (IllegalAccessException ex) {
             //  Log.l.fatalLog.fatal(DBCon.class.getName()+  ex.getMessage());
            // System.out.println(ex.getMessage());
@@ -231,32 +233,42 @@ public class DBCon {
 
     }
 
-    public LinkedList fetchAllRecord(int start, int limit,String cardNumber,String cvn) {
+    public LinkedList fetchAllRecord(int start, int limit,String cardNumber, String phone) {
 
         PreparedStatement ps = null;
         
         ResultSet rs = null;
         LinkedList myData = new LinkedList();
+        int cardIndex=0,msisdnIndex=0;
 
         try {
-            String sql = "SELECT id, card_number, cvn, answer, msisdn,expiry_date   FROM card_details   ";
-            
-            if (cardNumber.isEmpty() &&  cvn.isEmpty()) {
-              sql += " ORDER BY 1 DESC  LIMIT ? , ?";
-              ps = conn.prepareStatement(sql); 
+            String sql = "SELECT id, card_number, cvn, first_name, msisdn,expiry_date   FROM card_details WHERE 1   ";
+            int i=0;
+             if (! cardNumber.isEmpty()  ) {
+                sql += " AND card_number  =  ? " ;
+                 i += 1;
+                cardIndex = i;
+            }
+            if (! phone.isEmpty()  ) {
+                sql += " AND msisdn  =  ? " ;
+                 i += 1;
+                msisdnIndex = i;
+            }
+            sql +=" ORDER BY creation_date DESC LIMIT ? , ?  "  ;
+             //System.out.println("Sql : " + sql); 
              
-              ps.setInt(1, start);
-              ps.setInt(2, limit);
-            }
-            else {
-                sql += " WHERE card_number  =  ? AND cvn = ? ORDER BY 1 DESC  LIMIT ? , ? " ;
             ps = conn.prepareStatement(sql);  
-            ps.setString(1, AESEncryption.encrypt(cardNumber));
-            ps.setString(2, cvn);
-            ps.setInt(3, start);
-            ps.setInt(4, limit);
-              
-            }
+            
+            if (! cardNumber.isEmpty()) {
+               ps.setString(cardIndex, AESEncryption.encrypt(cardNumber));
+              }
+              if (! phone.isEmpty()) {
+               ps.setString(msisdnIndex, phone);
+              }
+             i += 1;
+             ps.setInt(i, start); 
+              i += 1;
+             ps.setInt(i, limit);
             
             
             rs = ps.executeQuery();
@@ -370,7 +382,7 @@ public class DBCon {
                 endDateIndex =  i;
             }
             
-             sql +=" ORDER BY 1 DESC LIMIT ? , ?  "  ;
+             sql +=" ORDER BY creation_date DESC LIMIT ? , ?  "  ;
               
              //System.out.println("sql : " + sql );
                
@@ -400,6 +412,103 @@ public class DBCon {
              ps.setInt(i, start); 
               i += 1;
              ps.setInt(i, limit);
+             
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                JSONArray myList = new JSONArray();
+                myList.put(rs.getString(1));
+                myList.put(AESEncryption.decrypt(rs.getString(2)));
+                myList.put(rs.getString(3));
+                myList.put(rs.getString(4));
+                myList.put(rs.getString(5));
+                myList.put(rs.getString(6)); 
+                myList.put(rs.getString(7));
+                myList.put(rs.getString(8));
+                myData.add(myList);
+            }
+
+            ps.close();
+        } catch (Exception ex) {
+           // System.out.println("Error : " + ex.getMessage());
+            ex.printStackTrace();
+        } finally {
+
+            closeConnection(ps);
+        }
+        return myData;
+        //To change body of generated methods, choose Tools | Templates.
+    }
+public LinkedList fetchAllTransaction(String card,String msisdn,String remark,String action,String channel,String startDate,String endDate) {
+
+        PreparedStatement ps = null;
+        
+        
+        ResultSet rs = null;
+        LinkedList myData = new LinkedList();
+        int cardIndex=0,msisdnIndex=0,remarksIndex=0,actionIndex=0,channelIndex=0,startDateIndex=0,endDateIndex=0;
+        
+        try {
+            String sql = "SELECT msisdn, card, payload,action,remarks,channel,network,creation_date FROM transaction WHERE 1  ";
+            int i=0;
+            if (! card.isEmpty()) {
+                sql +=" AND card  = ? " ;  
+                i += 1;
+                cardIndex = i;
+            }
+            if (! msisdn.isEmpty()) {
+                sql +=" AND msisdn = ? " ; 
+                i += 1;
+                msisdnIndex = i;
+            }
+            if (! remark.isEmpty()) {
+                sql +=" AND remarks = ? ";
+                i += 1;
+                remarksIndex = i;
+            }
+            if (! action.isEmpty()) {
+                sql +=" AND action =  ? "  ; 
+                i += 1;
+                actionIndex = i;
+            }
+            if (! channel.isEmpty()) {
+                sql +=" AND channel =  ? "  ; 
+                i += 1;
+                channelIndex = i;
+            }
+            if (! startDate.isEmpty() && ! endDate.isEmpty()) {
+                sql +=" AND DATE(creation_date) BETWEEN ?  AND  ? "  ; 
+                i += 1;
+                startDateIndex = i;
+                 i += 1;
+                endDateIndex =  i;
+            }
+            
+             sql +=" ORDER BY creation_date DESC "  ;
+              
+             //System.out.println("sql : " + sql );
+               
+               ps = conn.prepareStatement(sql);
+              
+            if (! card.isEmpty()) {
+               ps.setString(cardIndex, AESEncryption.encrypt(card));
+              }
+            if (! msisdn.isEmpty()) {
+               ps.setString(msisdnIndex, msisdn);
+              }
+            if (! remark.isEmpty()) {
+               ps.setString(remarksIndex, remark);
+              }
+            if (! action.isEmpty()) {
+               ps.setString(actionIndex, action);
+              }
+            if (! channel.isEmpty()) {
+               ps.setString(channelIndex, channel);
+              }
+            if (! startDate.isEmpty() && ! endDate.isEmpty()) {
+               ps.setString(startDateIndex, startDate.substring(0, 10));
+               ps.setString(endDateIndex, endDate.substring(0, 10));
+              }
+            
              
             rs = ps.executeQuery();
             while (rs.next()) {
@@ -462,28 +571,35 @@ public class DBCon {
         //To change body of generated methods, choose Tools | Templates.
     }
 
-    public int getRecordCount(String cardNumber, String cvn) {
+    public int getRecordCount(String cardNumber,String phone) {
 
         PreparedStatement ps = null;
         ResultSet rs = null;
         int total = 0;
-
+        int cardIndex=0,msisdnIndex=0;
         try {
             
             String sql = "SELECT count(*) total  FROM card_details WHERE 1  ";
-            if (! cardNumber.isEmpty() && ! cvn.isEmpty() ) {
-                sql += " AND card_number  =  ? AND cvn = ? " ;   
+            int i=0;
+            if (! cardNumber.isEmpty()  ) {
+                sql += " AND card_number  =  ? " ;
+                 i += 1;
+                cardIndex = i;
             }
-            if (cardNumber.isEmpty() &&  cvn.isEmpty()) {
-              ps = conn.prepareStatement(sql);  
-            }
-            else {
-            ps = conn.prepareStatement(sql);  
-            ps.setString(1, AESEncryption.encrypt(cardNumber));
-            ps.setString(2, cvn); 
-              
+            if (! phone.isEmpty()  ) {
+                sql += " AND msisdn  =  ? " ;
+                 i += 1;
+                msisdnIndex = i;
             }
             
+              ps = conn.prepareStatement(sql); 
+              if (! cardNumber.isEmpty()  ) {
+               ps.setString(cardIndex, cardNumber);
+               }
+              if (! phone.isEmpty()  ) {
+               ps.setString(msisdnIndex, phone);
+               }
+           
             rs = ps.executeQuery();
             while (rs.next()) {
                 total = rs.getInt(1);
@@ -817,7 +933,36 @@ public class DBCon {
         return pin;
 
     }
+String getCardPin(String CardNumber) {
+        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        String pin = null;
+        try {
+            String sql = "SELECT pin FROM card_details WHERE card_number = ?   LIMIT 1";
+            ps = conn.prepareStatement(sql);
+           // System.out.println("Sql : " + sql);
+            ps.setString(1, AESEncryption.encrypt(CardNumber));
+            rs = ps.executeQuery();
+            while (rs.next()) {
+              //  Log.l.infoLog.info("Info :  " + myThreadid +" has selected "+bucketSize+" records");
 
+                pin = AESEncryption.decrypt(rs.getString(1).trim());
+
+            }
+            rs.close();
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+
+        } finally {
+
+            closeConnection(ps);
+
+        }
+        return pin;
+
+    }
     void insertOutMessageRequest(String msg, String msisdn, String sourceAddress) {
 
         PreparedStatement ps = null;
@@ -830,7 +975,7 @@ public class DBCon {
             ps.setString(3, sourceAddress);
             //System.out.println("CVN " +CVN+ " CardNumber " + CardNumber + " dob " + dob + " msisdn " + msisdn);
             result = ps.executeUpdate();
-            System.out.println("Sql : " + sql);
+           // System.out.println("Sql : " + sql);
         } catch (SQLException ex) {
             ex.printStackTrace();
         } finally {

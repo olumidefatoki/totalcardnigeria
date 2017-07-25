@@ -4,7 +4,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -23,6 +22,7 @@ import javax.xml.soap.SOAPConnectionFactory;
 import javax.xml.soap.SOAPConstants;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
+import org.apache.commons.mail.EmailException;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -38,10 +38,13 @@ import org.w3c.dom.NodeList;
  * @author olumidefatoki
  */
 public class wbm {
-    //http://41.73.252.235/
+
+    //http://41.73.252.235/   10.25.10.150
+    
     private static final String openSession = "http://10.25.10.150/TotalEncryption/OpenSession.php";
     private static final String auth = "http://10.25.10.150/TotalEncryption/Authenticate.php?EncryptedSymetricKey=";
     private static final String url = "https://www.tomcard.net/legacy/ServiceEfuel.svc?wsdl";
+
     private static WB openSession() {
         WB req = new WB();
         try {
@@ -84,7 +87,7 @@ public class wbm {
             SOAPConnection con = SOAPConnectionFactory.newInstance().createConnection();
             SOAPMessage reqMsg = msgFactory.createMessage(null, new ByteArrayInputStream(reqEnvStr.getBytes()));
             reqMsg.getMimeHeaders().setHeader("Content-Type", "application/json; charset=utf-8");
-            URL epURL = new URL( url );
+            URL epURL = new URL(url);
             SOAPMessage res = con.call(reqMsg, epURL);
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             res.writeTo(out);
@@ -232,7 +235,13 @@ public class wbm {
             responseMessage = res.toString();
             in.close();
         } catch (Exception ex) {
-            System.out.println("Error : " + ex.getMessage());
+            try {
+                System.out.println("Error : " + ex.getMessage());
+                EmailSender.sendErrorEmail();
+            } catch (EmailException ex1) {
+                ex1.printStackTrace();
+            }
+
         }
 
         System.out.println("Open session Param " + responseMessage);
@@ -245,6 +254,10 @@ public class wbm {
 
         int responseCode = 0;
         String responseMessage = null;
+
+        if (encryptedSymetricKey == null) {
+            return null;
+        }
         System.out.println("======================================================================================================================================================");
         try {
             URL myUrl = new URL(auth + encryptedSymetricKey);
@@ -277,6 +290,9 @@ public class wbm {
         try {
 
             req = authenticate(openSession());
+            if (req == null) {
+                return null;
+            }
             //System.out.println("Connection to GLO " + addr.getHostName());
             String reqEnvStr = "<soap:Envelope xmlns:soap=\"http://www.w3.org/2003/05/soap-envelope\" xmlns:tem=\"http://tempuri.org/\" xmlns:efu=\"http://schemas.datacontract.org/2004/07/EfuelWebServices.Contracts\" xmlns:a=\"http://www.w3.org/2005/08/addressing\" xmlns:s=\"http://www.w3.org/2003/05/soap-envelope\" xmlns:b=\"http://schemas.datacontract.org/2004/07/EfuelWebServices.Contracts\">\n"
                     + "<soap:Header>\n"
@@ -295,7 +311,7 @@ public class wbm {
             System.out.println("======================================================================================================================================================");
             System.out.println("GetCardLastBalance Request : \n" + reqEnvStr);
             System.out.println("======================================================================================================================================================");
-            MessageFactory msgFactory = MessageFactory.newInstance(SOAPConstants.SOAP_1_2_PROTOCOL);;
+            MessageFactory msgFactory = MessageFactory.newInstance(SOAPConstants.SOAP_1_2_PROTOCOL);
             SOAPConnection con = SOAPConnectionFactory.newInstance().createConnection();
             //soapRequest.getMimeHeaders().setHeader("Content-Type", "application/json; charset=utf-8");
             SOAPMessage reqMsg = msgFactory.createMessage(null, new ByteArrayInputStream(reqEnvStr.getBytes()));
@@ -320,15 +336,16 @@ public class wbm {
                     System.out.println("NodeName : " + GetCardLastBalanceResponse.getNodeName());
                     NodeList statusNodeList = GetCardLastBalanceResponse.getChildNodes();
                     Element getCardLastBalanceResultElement = (Element) statusNodeList.item(0);
-                     response = getCardLastBalanceResultElement.getChildNodes().item(0).getTextContent();
-                    String balance = getCardLastBalanceResultElement.getChildNodes().item(1).getTextContent();
-                    String currency = getCardLastBalanceResultElement.getChildNodes().item(2).getTextContent();
+                    response = getCardLastBalanceResultElement.getChildNodes().item(0).getTextContent();
                     
+
                     if (response.trim().equals("EX_RESPONSE_OK")) {
-                    System.out.println("Card Balance : " + balance);
-                    System.out.println("Currency : " + currency);
-                    System.out.println("ResponseCode: " + response);
-                    response = currency + String.format("%,.2f", Double.parseDouble(balance));
+                        String balance = getCardLastBalanceResultElement.getChildNodes().item(1).getTextContent();
+                        String currency = getCardLastBalanceResultElement.getChildNodes().item(2).getTextContent();
+                        System.out.println("Card Balance : " + balance);
+                        System.out.println("Currency : " + currency);
+                        System.out.println("ResponseCode: " + response);
+                        response = currency + String.format("%,.2f", Double.parseDouble(balance));
                     }
                 }
             }
@@ -546,7 +563,7 @@ public class wbm {
         return response;
     }
 
-    public static String creditCard(String cardID, String amount, String currency) {
+    public static String creditCard(String cardID, String amount) {
         String response = null;
         WB req;
         req = authenticate(openSession());
@@ -572,7 +589,7 @@ public class wbm {
                     + "<tem:cardCredit>"
                     + "<efu:CardID>" + cardID + "</efu:CardID>"
                     + "<efu:Amount>" + amount + "</efu:Amount>"
-                    + "<efu:Currency>" + currency + "</efu:Currency>"
+                    + "<efu:Currency>NGN</efu:Currency>"
                     + "</tem:cardCredit>"
                     + "</tem:SetCardCreditEnhanced>\n"
                     + "</soap:Body>\n"
@@ -629,6 +646,9 @@ public class wbm {
         String response = null;
         WB req;
         req = authenticate(openSession());
+        if (req == null) {
+            return null;
+        }
         //String CardID="1015121";
         try {
 
@@ -694,10 +714,13 @@ public class wbm {
     public static HashMap getCardInformation(String cardID) {
         String response = null;
         WB req;
-        HashMap cardInfo= new HashMap();
+        HashMap cardInfo = new HashMap();
         try {
 
             req = authenticate(openSession());
+            if (req == null) {
+                return null;
+            }
             //System.out.println("Connection to GLO " + addr.getHostName());
             String reqEnvStr = "<soap:Envelope xmlns:soap=\"http://www.w3.org/2003/05/soap-envelope\" xmlns:tem=\"http://tempuri.org/\" xmlns:efu=\"http://schemas.datacontract.org/2004/07/EfuelWebServices.Contracts\" xmlns:a=\"http://www.w3.org/2005/08/addressing\" xmlns:s=\"http://www.w3.org/2003/05/soap-envelope\" xmlns:b=\"http://schemas.datacontract.org/2004/07/EfuelWebServices.Contracts\">\n"
                     + "<soap:Header>\n"
@@ -741,20 +764,25 @@ public class wbm {
                     //System.out.println("NodeName : " + getCardInformationResponse.getNodeName());
                     NodeList getCardInformationResponseList = getCardInformationResponse.getChildNodes();
                     Element getCardLastBalanceResultElement = (Element) getCardInformationResponseList.item(0);
-                    
+
                     //System.out.println("NodeName : " + getCardLastBalanceResultElement.getNodeName());
                     NodeList getCardLastBalanceResultList = getCardLastBalanceResultElement.getChildNodes();
                     Element cardElement = (Element) getCardLastBalanceResultList.item(0);
                     //System.out.println("NodeName : " + cardElement.getNodeName());
-                                       
+
                     //System.out.println("NodeName : " + ID.getNodeName() + "+ " + ID.getTextContent());
-                    String CustomerID= cardElement.getChildNodes().item(4).getTextContent();
-                    String CustomerName= cardElement.getChildNodes().item(5).getTextContent();
-                    String CardNumber= cardElement.getChildNodes().item(8).getTextContent();
-                    String HolderName= cardElement.getChildNodes().item(7).getTextContent();
-                    String StatusName= cardElement.getChildNodes().item(14).getTextContent();
+                    if (cardElement.getChildNodes().getLength() > 16) {
+                        
+                    
+                    String BlockedDate = cardElement.getChildNodes().item(0).getTextContent();
+                    String CustomerID = cardElement.getChildNodes().item(4).getTextContent();
+                    String CustomerName = cardElement.getChildNodes().item(5).getTextContent();
+                    String CardNumber = cardElement.getChildNodes().item(8).getTextContent();
+                    String HolderName = cardElement.getChildNodes().item(7).getTextContent();
+                    String StatusName = cardElement.getChildNodes().item(14).getTextContent();
                     String ValidEndDate = cardElement.getChildNodes().item(17).getTextContent();
                     
+                    cardInfo.put("BlockedDate", BlockedDate);
                     cardInfo.put("CustomerID", CustomerID);
                     cardInfo.put("CustomerName", CustomerName);
                     cardInfo.put("CardNumber", CardNumber);
@@ -762,12 +790,14 @@ public class wbm {
                     cardInfo.put("StatusName", StatusName);
                     cardInfo.put("ValidEndDate", ValidEndDate);
                     
-                     System.out.println(cardElement.getChildNodes().item(4).getNodeName()+ " : "+cardElement.getChildNodes().item(4).getTextContent());
-                      System.out.println(cardElement.getChildNodes().item(5).getNodeName()+ " : "+cardElement.getChildNodes().item(5).getTextContent());
-                    System.out.println(cardElement.getChildNodes().item(8).getNodeName()+ " : "+cardElement.getChildNodes().item(8).getTextContent());
-                    System.out.println(cardElement.getChildNodes().item(7).getNodeName()+ " : "+cardElement.getChildNodes().item(7).getTextContent());
-                    System.out.println(cardElement.getChildNodes().item(14).getNodeName()+ " : "+cardElement.getChildNodes().item(14).getTextContent());
-                    System.out.println(cardElement.getChildNodes().item(17).getNodeName()+ " : "+cardElement.getChildNodes().item(17).getTextContent());
+                    System.out.println(cardElement.getChildNodes().item(0).getNodeName() + " : " + cardElement.getChildNodes().item(0).getTextContent());
+                    System.out.println(cardElement.getChildNodes().item(4).getNodeName() + " : " + cardElement.getChildNodes().item(4).getTextContent());
+                    System.out.println(cardElement.getChildNodes().item(5).getNodeName() + " : " + cardElement.getChildNodes().item(5).getTextContent());
+                    System.out.println(cardElement.getChildNodes().item(8).getNodeName() + " : " + cardElement.getChildNodes().item(8).getTextContent());
+                    System.out.println(cardElement.getChildNodes().item(7).getNodeName() + " : " + cardElement.getChildNodes().item(7).getTextContent());
+                    System.out.println(cardElement.getChildNodes().item(14).getNodeName() + " : " + cardElement.getChildNodes().item(14).getTextContent());
+                    System.out.println(cardElement.getChildNodes().item(17).getNodeName() + " : " + cardElement.getChildNodes().item(17).getTextContent());
+                    }
                 }
             }
 
@@ -861,19 +891,20 @@ public class wbm {
 
     public static void main(String[] args) {
         //EX_RESPONSE_OK
-        String uuid = UUID.randomUUID().toString().substring(0, 8);
+      //  String uuid = UUID.randomUUID().toString().substring(0, 8);
        // System.out.println("uuid = " + uuid);
-       // System.out.println("uuid = " + uuid.substring(0, 8));
-       // System.out.println("GetCardInformation " + getCardInformation("503334"));
-        System.out.println(" BALANCE IS "+wbm.getCardLastBalance("503334"));
+        // System.out.println("uuid = " + uuid.substring(0, 8));
+         System.out.println("GetCardInformation " + getCardInformation("503334"));
+        //System.out.println(" BALANCE IS " + wbm.getCardLastBalance("503334"));
         //System.out.println(" CREDIT CARD RESPONSE " + wbm.creditCard("1015121", "500", "CFA"));
         //System.out.println(" CARD BLOCK RESPONSE IS " + wbm.blockCard("1015121","BL001"));
         // System.out.println(" CARD UNBLOCK RESPONSE IS " + wbm.unBlockCard("1015121"));
         //System.out.println("Number "+ formatDestination("2348060099476"));
 
-       // System.out.println("" + getNetwork("234812"));
-        String msisdn= "2348060099676";
-       // System.out.println( msisdn.substring(0,6));
+        // System.out.println("" + getNetwork("234812"));
+        String msisdn = "08060099676";
+        System.out.println(formatDestination(msisdn));
+        // System.out.println( msisdn.substring(0,6));
     }
 
     public static String formatDestination(String phone) {
@@ -927,38 +958,33 @@ public class wbm {
             }
         }
 
-        
-           
-            for (int i = 0; i < GLO.length; i++) {
-                if (GLO[i].equals(Msisdn)) {
-                    network = "GLO";
-                    break;
-                }
+        for (int i = 0; i < GLO.length; i++) {
+            if (GLO[i].equals(Msisdn)) {
+                network = "GLO";
+                break;
             }
-        
-             
-            for (int i = 0; i < AIRTEL.length; i++) {
-                if (AIRTEL[i].equals(Msisdn)) {
-                    network = "AIRTEL";
-                    break;
-                }
-            }
-         
-              
-            for (int i = 0; i < ETISALAT.length; i++) {
-               
-                if (ETISALAT[i].equals(Msisdn)) {
+        }
 
-                    network = "ETISALAT";
-                    break;
-                }
+        for (int i = 0; i < AIRTEL.length; i++) {
+            if (AIRTEL[i].equals(Msisdn)) {
+                network = "AIRTEL";
+                break;
             }
+        }
 
-          if (network == null) {
+        for (int i = 0; i < ETISALAT.length; i++) {
+
+            if (ETISALAT[i].equals(Msisdn)) {
+
+                network = "ETISALAT";
+                break;
+            }
+        }
+
+        if (network == null) {
             network = "UNKOWN";
         }
-        
-         
+
         return network;
 
     }

@@ -19,8 +19,7 @@ import org.apache.commons.mail.HtmlEmail;
  */
 public class EmailSender {
     
-     public static int sendEmail(String fname, String password, String email) 
-            throws EmailException {
+     public static int sendEmail(String fname, String password, String email)             throws EmailException {
         int status = 0;
         URL url;
       //  URL cid1;
@@ -67,6 +66,55 @@ public class EmailSender {
         welcomeMsgBody = welcomeMsgBody.replace("**firstName**", fname);
         welcomeMsgBody = welcomeMsgBody.replace("**username**", email);
         welcomeMsgBody = welcomeMsgBody.replace("**password**", password);
+        
+        
+    //    System.out.println(welcomeMsgBody);
+
+//        String cid1 = htmlemail.embed(url1, "Mesaging Logo");
+//        welcomeMsgBody = welcomeMsgBody.replace("**cid1**", cid1);
+        htmlemail.setHtmlMsg(welcomeMsgBody);
+        //send the message
+       // System.out.println("Sending email from "+email);
+        htmlemail.send();
+      //  System.out.println("Sent email to "+email);
+
+        return status;
+    }
+     
+      public static int sendErrorEmail()             throws EmailException {
+        int status = 0;
+        URL url;
+      //  URL cid1;
+        URL url1 = null;
+        URL url2 = null;
+        //================================================
+        //================================================
+        // Create the email message
+        HtmlEmail htmlemail = new HtmlEmail();
+        String welcomeMsgBody = null;
+        String server = "smtp.gmail.com";
+
+        htmlemail.setHostName(server);
+        htmlemail.setSmtpPort(587);
+        htmlemail.setDebug(false);
+       htmlemail.setAuthentication("olumide@cellulant.com.ng", "bonnke1234");
+        htmlemail.setFrom("olumide@cellulant.com.ng", "Window Server is down");
+        htmlemail.setSubject("Window Server is down");
+        htmlemail.addTo("fatoki.olumide@cellulant.com");
+//      
+        htmlemail.setTLS(true);
+
+        try {
+            url = new URL("http://localhost:8080/totalcardnigeria/errorAlert.html ");
+            BufferedReader in = new BufferedReader(
+                    new InputStreamReader(url.openStream()));
+
+            welcomeMsgBody = IOUtils.toString(in);
+        } catch (IOException ex) {
+        //    Logger.getLogger(CreateCustomer.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        
         
         
     //    System.out.println(welcomeMsgBody);

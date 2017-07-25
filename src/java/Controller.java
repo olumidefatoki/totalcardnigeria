@@ -69,8 +69,9 @@ public class Controller extends HttpServlet {
                     
                 case 39:{
                      String cardNumber = request.getParameter("columns[1][search][value]");
-                     String cvn = request.getParameter("columns[2][search][value]");
-                      out.println(PupolateTable(limit,start,draw,cardNumber,cvn));                    
+                     String phone = request.getParameter("columns[2][search][value]");
+                     //System.out.println("phone : " + phone );
+                      out.println(PupolateTable(limit,start,draw,cardNumber,phone));                    
                     break;
                 }
                 case 40: {
@@ -118,13 +119,13 @@ public class Controller extends HttpServlet {
         return data;
     }
   
-    public JSONObject PupolateTable(int limit,int start,int draw, String cardNumber ,String cvn ){
+    public JSONObject PupolateTable(int limit,int start,int draw, String cardNumber, String phone  ){
             JSONObject data = new JSONObject();
              LinkedList myData= new LinkedList ();
              DBCon DBUtils= new DBCon();
             try {
-            int totalRecord=DBUtils.getRecordCount(cardNumber,cvn);
-            myData=DBUtils.fetchAllRecord(start,limit,cardNumber,cvn);
+            int totalRecord=DBUtils.getRecordCount(cardNumber,phone);
+            myData=DBUtils.fetchAllRecord(start,limit,cardNumber,phone);
             data.put("recordsFiltered", totalRecord);
             data.put("data", myData);
             data.put("draw",draw);

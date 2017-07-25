@@ -144,7 +144,7 @@
                                 <div class="col-md-12">
                                     <div class="box border blue">
                                         <div class="box-title">
-                                            <h4><i class="fa fa-book"></i>Card Balance</h4>
+                                            <h4><i class="fa fa-book"></i>Card Info</h4>
                                             <div class="tools">
                                                 <a href="#box-config" data-toggle="modal" class="config">
                                                     <i class="fa fa-cog"></i>
@@ -164,12 +164,14 @@
                                             <div class="tabbable">
                                                         <div class="row">
                                                                     <div class="panel-body">
-                                                                       <h2 > Card Number : ${requestScope.Customer['CardNumber']}</h2> 
-                                                                       <h2 > Customer ID : ${requestScope.Customer['CustomerID']}</h2> 
-                                                                       <h2 > Customer Name : ${requestScope.Customer['CustomerName']}</h2> 
-                                                                       <h2 >  ${requestScope.Customer['HolderName']}</h2> 
-                                                                       <h2 > Card Status : ${requestScope.Customer['StatusName']}</h2> 
-                                                                       <h2 >  Valid Till : ${requestScope.Customer['ValidEndDate']}</h2> 
+                                                                        
+                                                                       <h4> Card Number : ${requestScope.Customer['CardNumber']}</h4> 
+                                                                       <h4> Customer ID : ${requestScope.Customer['CustomerID']}</h4> 
+                                                                       <h4> Customer Name : ${requestScope.Customer['CustomerName']}</h4> 
+                                                                       <h4>  ${requestScope.Customer['HolderName']}</h4> 
+                                                                       <h4> Card Status : ${requestScope.Customer['StatusName']}</h4> 
+                                                                       <h4>  Valid Till : ${requestScope.Customer['ValidEndDate']}</h4> 
+                                                                       <h4>  Card Blocked Date : ${requestScope.Customer['BlockedDate']}</h4> 
                                                                     </div>
                                                 </div>
                                             </div>

@@ -42,7 +42,6 @@
         <!-- COLOR PICKER -->
         <link rel="stylesheet" type="text/css" href="./css/colorpicker.min.css">
         <!-- FONTS -->
-        <link href="./css/css" rel="stylesheet" type="text/css">
         <style type="text/css">
             .bigg-icon {
                 font-size: 120px;
@@ -229,12 +228,58 @@
                                                                     </a>
                                                                     <a href="handler?Type=33&id=${requestScope.Customer['id']}&cardnumber=${requestScope.Customer['card_number']}"  class="list-group-item "><i class="fa fa-money"></i>Card Balance</a>
                                                                     <a href="handler?Type=32&id=${requestScope.Customer['id']}&cardnumber=${requestScope.Customer['card_number']}"  class="list-group-item "><i class="fa fa-list fa-fw"></i>Card Info </a>
-                                                                    <a href="#Operations?Operation=0&Type=3&EntityType=C&cardnumber=${requestScope.Customer['card_number']}"  class="list-group-item "><i class="fa fa-list fa-fw"></i> Card Transactions</a>
-                                                                    <a href="Operations?Operation=0&Type=4&EntityType=C&cardnumber=${requestScope.Customer['card_number']}"  data-toggle="tab" class="list-group-item sync-request"><i class="fa fa-unlock"></i> Unblock Card</a>
-                                                                    <a href="Operations?Operation=0&Type=5&EntityType=C&cardnumber=${requestScope.Customer['card_number']}"  data-toggle="tab" class="list-group-item sync-request"><i class="fa fa-lock"></i> Blacklist Card</a>
-                                                                    <a href="#Operations?Operation=0&Type=5&EntityType=C&cardnumber=${requestScope.Customer['card_number']}"  class="list-group-item "><i class="fa fa-exchange"></i> Card Balance Transfer</a>
-                                                                    <a href="#Operations?Operation=0&Type=5&EntityType=C&cardnumber=${requestScope.Customer['card_number']}"  class="list-group-item "><i class="fa fa-id-card-o"></i> Card Credit Order</a>
+                                                                     <a href="handler?Type=30&PhoneNumber=${requestScope.Customer['msisdn']}&cardnumber=${requestScope.Customer['card_number']}"  data-toggle="tab" class="list-group-item sync-request"><i class="fa fa-unlock"></i> Send Pin</a>
+                                                                    <a href="handler?Type=29&cardnumber=${requestScope.Customer['card_number']}"  data-toggle="tab" class="list-group-item sync-request"><i class="fa fa-unlock"></i> Unblock Card</a>
+                                                                    
+                                                                    <a href="#" data-toggle="modal" class="list-group-item" data-target="#blacklist"><i class="fa fa-lock"></i> Blacklist Card</a>
                                                                 </div>
+                                                                <div class="modal fade maccops" id="blacklist" tabindex="-1" role="dialog" aria-labelledby=FundAccount aria-hidden="true">
+                                                                            <div class="modal-dialog">
+                                                                                <div class="modal-content">
+                                                                                    <div class="modal-header">
+                                                                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                                                            <span aria-hidden="true">&times;</span>
+                                                                                        </button>
+                                                                                        <h4 class="modal-title"><i class="fa fa-lock"></i> Card Blacklist</h4>
+                                                                                    </div>
+
+                                                                                    <div class="modal-body">
+                                                                                        <!-- The form is placed inside the body of modal -->
+                                                                                        <form action="#" id="fundwallet" method="post" class="form-horizontal acc-ops">
+                                                                                            <input  type="hidden" name="Type" value="1"/>
+                                                                                            <input  type="hidden" name="cardNumber" value="${requestScope.Customer['card_number']}"/>
+                                                                                            
+                                                                                            <div class="form-group" required>
+                                                                                                <label class="col-xs-3 control-label">Reason</label>
+                                                                                                <div class="col-xs-7">
+                                                                                                    <select name="reason" id="bank" class="col-md-12">
+                                                                                                        <option value="BL001">Payment Problem</option>
+                                                                            <option value="BL002">Lost</option>
+                                                                            <option value="BL003">Stolen</option>
+                                                                            <option value="BL004">Wrong pin</option>
+                                                                            <option value="BL005">Temporary locked</option>
+                                                                            <option value="BL006">Invalid</option>
+                                                                            <option value="BL007">E-purse locked</option>
+                                                                            <option value="BL008">Validation exceeded</option>
+                                                                            <option value="BL009">Downloaded credit issue</option>
+                                                                            <option value="BL010">Invalidation</option>
+                                                                            <option value="BL012">Revalidation</option>
+                                                                            <option value="BL022">Incur exceeded</option>
+                                                                                                    </select>
+                                                                                                </div>
+                                                                                            </div>
+
+                                                                                            <div class="form-group">
+                                                                                                <div class="col-xs-5 col-xs-offset-3">
+                                                                                                    <button type="submit" class="btn btn-primary">Submit</button>
+                                                                                                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </form>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
 
                                                             </div>
                                                         </div>
@@ -242,25 +287,25 @@
                                                     <div class="tab-pane" id="edit-profile">
                                                         <div class="scroller" data-height="380px">
                                                             <div class="box-body big">
-                                                                <form class="form-horizontal acc-ops" action="handler">
+                                                                <form class="form-horizontal" action="handler">
                                                                     <input  type="hidden" name="Type" value="31"/>
                                                                     <input  type="hidden" name="id" value="${requestScope.Customer['id']}"/>
                                                                     <div class="form-group">
                                                                         <label class="col-md-2 control-label">Email</label> 
                                                                         <div class="col-sm-6">
-                                                                            <input name="email" type="text" value="${requestScope.Customer['email']}" class="form-control">
+                                                                            <input name="email" type="text" class="form-control" required="true" value="${requestScope.Customer['email']}" class="form-control">
                                                                         </div>
                                                                     </div>
                                                                     <div class="form-group">
                                                                         <label class="col-sm-2 control-label">Phone </label>
                                                                         <div class="col-sm-6">
-                                                                            <textarea name="msisdn" class="form-control" rows="3">${requestScope.Customer['msisdn']}</textarea>
+                                                                            <textarea name="msisdn" class="form-control" class="form-control" required="true" rows="3">${requestScope.Customer['msisdn']}</textarea>
                                                                         </div>
                                                                     </div>
                                                                     <div class="form-group">
                                                                         <label class="col-md-2 control-label">name</label> 
                                                                         <div class="col-sm-6">
-                                                                            <input name="fname" type="text" value="${requestScope.Customer['name']}" class="form-control">
+                                                                            <input name="fname" type="text" class="form-control" required="true" value="${requestScope.Customer['name']}" class="form-control">
                                                                         </div>
                                                                     </div>
                                                                     <div class="form-group">
@@ -406,6 +451,71 @@
                         $.ajax({
                             url: target,
 //                            url: "/Operations",
+                            type: "post",
+                            dataType: "xml",
+                            success: function (data) {
+
+                                var stat = $(data).find('status').text();
+                                var msg = $(data).find('message').text();
+//                        alert(stat);
+                                if (stat === "1") {
+                                    //Call
+                                    messgr.update({
+                                        message: msg,
+                                        type: 'success',
+                                        showCloseButton: true,
+                                        actions: false
+                                    });
+                                } else {
+                                    //Call
+                                    return messgr.update({
+                                        message: "Request processing failed..." + msg,
+                                        type: 'error',
+                                        showCloseButton: true,
+                                        actions: false
+                                    });
+                                }
+
+                            },
+                            error: function (err) {
+                                //Call
+
+                                return messgr.update({
+                                    message: "Request is processing failed...",
+                                    type: 'error',
+                                    showCloseButton: true,
+                                    actions: false
+                                });
+                            }
+
+                        });
+                    }
+                });
+            });
+        </script>
+        <script>
+            $(".acc-ops").submit(function (event) {
+                event.preventDefault();
+                var values = $(this).serialize();
+                /* Stop form from submitting normally */
+                bootbox.confirm("Are you sure you want to proceed?", function (result) {
+                    $('.maccops').modal('hide');
+                    if (result) {
+                        //Set theme
+                        Messenger.options = {
+                            extraClasses: 'messenger-fixed messenger-on-top',
+                            theme: 'future'
+                        }
+                        //Call
+                        var messgr = Messenger().post({
+                            message: "Your request is processing...",
+                            showCloseButton: false
+                        });
+//                        alert(target);
+                        /* Send the data using post and put the results in a div */
+                        $.ajax({
+                            url: "handler?Type=28",
+                            data: values,
                             type: "post",
                             dataType: "xml",
                             success: function (data) {

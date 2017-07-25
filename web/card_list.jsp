@@ -157,8 +157,8 @@
                                             <div class="row">
                                                 <div class="col-md-9">
                                                     <div class="row">
-                                                        <div class="col-md-3"><input class="form-control input-sm" id="card_number" type="text" placeholder="CardNumber"/></div>
-                                                        <div class="col-md-3"><input class="form-control input-sm" id="cvn" type="text" placeholder="CVN"/></div>
+                                                        <div class="col-md-3"><input class="form-control input-sm" id="card_number" type="text" placeholder="Card Number"/></div>
+                                                        <div class="col-md-3"><input class="form-control input-sm" id="phone_number" type="text" placeholder="Phone Number"/></div>
                                                         <div class="col-md-3"><button class="btn btn-primary btn-sm form-control input-sm" id="searchfilter"><i class="fa fa-filter"></i> Filter Search</button></div>
                                                     </div>
                                                 </div>
@@ -254,10 +254,10 @@
 
                 $("#searchfilter").click(function () {
                     var col_text_0 = $('#card_number').val();
-                    var col_text_1 = $('#cvn').val(); 
+                    var col_text_1 = $('#phone_number').val();
                     table
                             .column(1).search(col_text_0)
-                            .column(2).search(col_text_1)                            
+                            .column(2).search(col_text_1)       
                             .draw();
                 });
 
@@ -288,28 +288,7 @@
                     var data = table.ajax.params();
                     window.location= "handler?Type=37&columns[2][search][value]=&download=1&"+$.param(data);
                 });
-                  
-              //  table.on('xhr', function () {
-              //      var json = table.ajax.json();
-                //     alert(JSON.stringify(json));
-                //    $("#rec-tot").html(Number(json.recordsTotal).toLocaleString('en'));
-                // });
-
-                $('#cust_datatable tbody').on('click', 'td.details-control', function () {
-                    var tr = $(this).closest('tr');
-                    var row = table.row(tr);
-
-                    if (row.child.isShown()) {
-                        // This row is already open - close it
-                        row.child.hide();
-                        tr.removeClass('shown');
-                    }
-                    else {
-                        // Open this row
-                        row.child(format(row.data())).show();
-                        tr.addClass('shown');
-                    }
-                });
+           
             });
         </script>
 
